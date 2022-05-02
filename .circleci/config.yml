@@ -1,38 +1,24 @@
 version: 2.1
 
+orbs:
+  python: circleci/python@1.5.0
+
 jobs:
-  
-  build-medium-amd64:
-    machine:
-      image: ubuntu-2004:202101-01
-   
-    working_directory: ~/python-lz4
-    steps:
-      
-      
-      - checkout
-      - run:
-          name: ️️🏗️ pip dev requirements
-          command: |
-             uname -m 
-             sudo apt-get update && sudo apt-get -y install python3 python3-pip 
-             sudo apt-get install -y python-dev libldap2-dev libsasl2-dev libssl-dev
-             python3 -m pip install -U pip 
-             python3 setup.py install 
-             pip3 install -r requirements.txt
-             pip3 install -r requirements-dev.txt
-             pip3 install -r requirements-extra.txt
-             nosetests --stop -v --with-coverage --cover-package=flask_appbuilder flask_appbuilder.tests --ignore-files="test_mongoengine\.py"
-  build-medium-arm64:
+  manylinux2014-aarch64:
+    parameters:
+      cibw_build:
+        type: string
+        default: "cp37-*"
+
     machine:
       image: ubuntu-2004:202101-01
     resource_class: arm.medium
-    working_directory: ~/python-lz4
     steps:
-      
       - checkout
+      - run: git submodule sync
+      - run: git submodule update --init
       - run:
-          name: ️️🏗️ pip dev requirements
+          name: Install dependencies
           command: |
              uname -m 
              sudo apt-get update && sudo apt-get -y install python3 python3-pip 
@@ -45,9 +31,11 @@ jobs:
              nosetests --stop -v --with-coverage --cover-package=flask_appbuilder flask_appbuilder.tests --ignore-files="test_mongoengine\.py"
  
 workflows:
-  version: 2
-  python3.8:
+  version: 2.1
+  main:
     jobs:
-      
-      - build-medium-amd64
-      - build-medium-arm64
+      - manylinux2014-aarch64:
+          matrix:
+            parameters:
+              cibw_build:
+                - "cp37*"
