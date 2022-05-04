@@ -28,7 +28,7 @@ jobs:
              pip3 install -r requirements.txt
              pip3 install -r requirements-dev.txt
              pip3 install -r requirements-extra.txt
-             nosetests --stop -v --cover-package=flask_appbuilder flask_appbuilder.tests --ignore-files="test_mongoengine\.py"
+             tox -e py38
  
 workflows:
   version: 2.1
